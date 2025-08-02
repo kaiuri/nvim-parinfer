@@ -1,8 +1,8 @@
 local api = vim.api
 local modes
 do
-  local parinfer = require("parinfer")
-  modes = {indent = parinfer.indentMode, paren = parinfer.parenMode, smart = parinfer.smartMode}
+  local parinfer = require("parinfer.impl")
+  modes = { indent = parinfer.indentMode, paren = parinfer.parenMode, smart = parinfer.smartMode }
 end
 local ns = api.nvim_create_namespace("parinfer")
 local state
@@ -10,7 +10,7 @@ local function _1_(t, k)
   t[k] = {}
   return t[k]
 end
-state = setmetatable({}, {__index = _1_})
+state = setmetatable({}, { __index = _1_ })
 local function true_3f(val)
   local _2_ = val
   local function _3_()
@@ -23,8 +23,6 @@ local function true_3f(val)
   elseif (nil ~= _2_) then
     local n = _2_
     return (n ~= 0)
-  else
-    return nil
   end
 end
 local function log(tag, data)
@@ -42,8 +40,6 @@ local function log(tag, data)
       return f:write(("%s: %s\n"):format(tag, vim.fn.json_encode(data)))
     end
     return close_handlers_10_auto(_G.xpcall(_6_, (package.loaded.fennel or debug).traceback))
-  else
-    return nil
   end
 end
 local function get_option_2a(opt)
@@ -53,8 +49,6 @@ local function get_option_2a(opt)
     return v
   elseif (_8_ == nil) then
     return vim.g[opt]
-  else
-    return nil
   end
 end
 local function expand_tab_stops(tabstops)
@@ -76,8 +70,6 @@ local function expand_tab_stops(tabstops)
       end
     end
     return xs
-  else
-    return nil
   end
 end
 local function next_stop(stops, col, forward)
@@ -100,10 +92,9 @@ local function next_stop(stops, col, forward)
     else
       return left
     end
-  else
-    return nil
   end
 end
+
 local function tab(forward)
   local bufnr = vim.api.nvim_get_current_buf()
   local stops = expand_tab_stops(state[bufnr].tabstops)
@@ -142,30 +133,33 @@ local function tab(forward)
   do
     local shift = (next_x - col)
     if (shift > 0) then
-      api.nvim_buf_set_text(0, (lnum - 1), 0, (lnum - 1), 0, {string.rep(" ", shift)})
+      api.nvim_buf_set_text(0, (lnum - 1), 0, (lnum - 1), 0, { string.rep(" ", shift) })
     else
-      api.nvim_buf_set_text(0, (lnum - 1), 0, (lnum - 1), (-1 * shift), {""})
+      api.nvim_buf_set_text(0, (lnum - 1), 0, (lnum - 1), (-1 * shift), { "" })
     end
   end
-  return api.nvim_win_set_cursor(0, {lnum, next_x})
+  return api.nvim_win_set_cursor(0, { lnum, next_x })
 end
+
 local function invoke_parinfer(bufnr, text, lnum, col)
   local _let_24_ = (state[bufnr]["prev-cursor"] or {})
   local prev_lnum = _let_24_[1]
   local prev_col = _let_24_[2]
   local changes = state[bufnr].changes
-  local request = {commentChars = get_option_2a("parinfer_comment_chars"), prevCursorLine = prev_lnum, prevCursorX = prev_col, cursorLine = lnum, cursorX = (col + 1), changes = changes, forceBalance = true_3f(get_option_2a("parinfer_force_balance"))}
+  local request = { commentChars = get_option_2a("parinfer_comment_chars"), prevCursorLine = prev_lnum, prevCursorX = prev_col, cursorLine = lnum, cursorX = (col + 1), changes = changes, forceBalance = true_3f(get_option_2a("parinfer_force_balance")) }
   local response = modes[get_option_2a("parinfer_mode")](text, request)
   log("request", request)
-  do end (state)[bufnr]["changes"] = {}
+  do end
+  (state)[bufnr]["changes"] = {}
   return response
 end
 local function update_buffer(bufnr, old_contents, new_contents)
   api.nvim_command("silent! undojoin")
-  do end (state)[bufnr]["locked"] = true
+  do end
+  (state)[bufnr]["locked"] = true
   do
     local new_lines = vim.split(new_contents, "\n")
-    local hunks = vim.diff(old_contents, new_contents, {result_type = "indices"})
+    local hunks = vim.diff(old_contents, new_contents, { result_type = "indices" })
     for _, _25_ in ipairs(hunks) do
       local _each_26_ = _25_
       local start_a = _each_26_[1]
@@ -180,7 +174,8 @@ local function update_buffer(bufnr, old_contents, new_contents)
           local val_19_auto = new_lines[i]
           if (nil ~= val_19_auto) then
             i_18_auto = (i_18_auto + 1)
-            do end (tbl_17_auto)[i_18_auto] = val_19_auto
+            do end
+            (tbl_17_auto)[i_18_auto] = val_19_auto
           else
           end
         end
@@ -198,12 +193,10 @@ end
 local function highlight_error(bufnr, err)
   api.nvim_buf_clear_namespace(bufnr, ns, 0, -1)
   if err then
-    local _let_29_ = {(err.lineNo - 1), (err.x - 1)}
+    local _let_29_ = { (err.lineNo - 1), (err.x - 1) }
     local lnum = _let_29_[1]
     local col = _let_29_[2]
-    return vim.highlight.range(bufnr, ns, "Error", {lnum, col}, {lnum, (col + 1)}, "c")
-  else
-    return nil
+    return vim.highlight.range(bufnr, ns, "Error", { lnum, col }, { lnum, (col + 1) }, "c")
   end
 end
 local function is_undo_leaf_3f()
@@ -220,7 +213,7 @@ local function _32_(t, k)
   t[k] = {}
   return rawget(t, k)
 end
-elapsed_times = setmetatable({}, {__index = _32_})
+elapsed_times = setmetatable({}, { __index = _32_ })
 local function process_buffer(bufnr)
   if should_run_3f(bufnr) then
     local start = vim.loop.hrtime()
@@ -236,12 +229,12 @@ local function process_buffer(bufnr)
     local new_col = _let_34_["cursorX"]
     state[bufnr]["changedtick"] = vim.b[bufnr].changedtick
     state[bufnr]["tabstops"] = response.tabStops
-    state[bufnr]["prev-cursor"] = {new_lnum, new_col}
+    state[bufnr]["prev-cursor"] = { new_lnum, new_col }
     if (response.text ~= text) then
       log("change-response", response)
       local function _35_()
         update_buffer(bufnr, text, response.text)
-        return api.nvim_win_set_cursor(winnr, {new_lnum, (new_col - 1)})
+        return api.nvim_win_set_cursor(winnr, { new_lnum, (new_col - 1) })
       end
       vim.schedule(_35_)
     else
@@ -252,8 +245,6 @@ local function process_buffer(bufnr)
     else
     end
     return table.insert(elapsed_times[bufnr], (vim.loop.hrtime() - start))
-  else
-    return nil
   end
 end
 local function slice(lines, start_row, start_col, row_offset, col_offset)
@@ -268,7 +259,7 @@ local function slice(lines, start_row, start_col, row_offset, col_offset)
     end
   end
   first_line = string.sub(lines[start_row0], start_col0, _39_())
-  local out = {first_line}
+  local out = { first_line }
   for i = (start_row0 + 1), ((start_row0 + row_offset) - 1) do
     local line = lines[i]
     table.insert(out, line)
@@ -297,27 +288,26 @@ local function on_bytes(_, bufnr, _0, start_row, start_col, _1, old_end_row, old
       if (start_row < #contents) then
         new_text = slice(contents, start_row, start_col, new_end_row, new_end_col)
       else
-        new_text = {""}
+        new_text = { "" }
       end
       if not state[bufnr].changes then
         state[bufnr]["changes"] = {}
       else
       end
-      table.insert(state[bufnr].changes, {oldText = table.concat(old_text, "\n"), newText = table.concat(new_text, "\n"), lineNo = (start_row + 1), x = (start_col + 1)})
+      table.insert(state[bufnr].changes, { oldText = table.concat(old_text, "\n"), newText = table.concat(new_text, "\n"), lineNo = (start_row + 1), x = (start_col + 1) })
     else
     end
     state[bufnr]["prev-contents"] = contents
-    return nil
-  else
     return nil
   end
 end
 local function enter_buffer()
   local bufnr = vim.api.nvim_get_current_buf()
   local contents = vim.api.nvim_buf_get_lines(bufnr, 0, -1, true)
-  do end (state)[bufnr]["changedtick"] = -1
+  do end
+  (state)[bufnr]["changedtick"] = -1
   state[bufnr]["prev-contents"] = contents
-  vim.api.nvim_buf_attach(bufnr, false, {on_bytes = on_bytes})
+  vim.api.nvim_buf_attach(bufnr, false, { on_bytes = on_bytes })
   local mode = vim.g.parinfer_mode
   vim.g.parinfer_mode = "paren"
   process_buffer(bufnr)
@@ -329,7 +319,7 @@ local function cursor_moved(bufnr)
     local _let_48_ = vim.api.nvim_win_get_cursor(0)
     local lnum = _let_48_[1]
     local col = _let_48_[2]
-    state[bufnr]["prev-cursor"] = {lnum, (col + 1)}
+    state[bufnr]["prev-cursor"] = { lnum, (col + 1) }
     return nil
   end
   return vim.schedule(_47_)
@@ -362,9 +352,9 @@ local function stats()
     local sqsum = (sum * sum)
     local std = math.sqrt(((sumsq - (sqsum / n)) / (n - 1)))
     return print(("N: %d    Min: %0.6fms    Max: %0.6fms    Avg: %0.6fms    Std: %0.6fms"):format(n, (min / 1000000), (max / 1000000), (avg / 1000000), (std / 1000000)))
-  else
-    return nil
   end
 end
-parinfer = {enter_buffer = enter_buffer, cursor_moved = cursor_moved, text_changed = text_changed, stats = stats, tab = tab}
+
+_G.parinfer = { enter_buffer = enter_buffer, cursor_moved = cursor_moved, text_changed = text_changed, stats = stats, tab = tab }
+
 return nil

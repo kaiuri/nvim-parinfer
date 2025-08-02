@@ -1131,10 +1131,7 @@ local function clampParenTrailToCursor(result)
             i = i + 1
         end
 
-        local openers = {}
-        for _, v in ipairs(result.parenTrail.openers) do
-            table.insert(openers, v)
-        end
+        local openers = result.parenTrail.openers
 
         local openersLen = tableSize(openers)
         result.parenTrail.openers = sliceTable(openers, removeCount, openersLen)
@@ -1336,17 +1333,15 @@ rememberParenTrail = function(result)
         }
         stackPush(result.parenTrails, shortTrail)
 
-        -- TODO: this almost certainly is not working due to openers
-        -- being a deep copy here and then not being returned anywhere
-        -- possibly a bug in parinfer.js as well
-        if result.returnParens then
-            for _, v in ipairs(trail.clamped.openers) do
-                v.closer.trail = shortTrail
-            end
-            for _, v in ipairs(trail.openers) do
-                v.closer.trail = shortTrail
-            end
-        end
+    -- TODO: this almost certainly is not working due to openers
+    -- being a deep copy here and then not being returned anywhere
+    -- possibly a bug in parinfer.js as well
+    --if result.returnParens then
+    --  local i
+    --  for (i = 0; i < openers.length; i++) {
+    --    openers[i].closer.trail = shortTrail
+    --  }
+    --end
     end
 end
 

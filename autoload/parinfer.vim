@@ -73,4 +73,4 @@ function! parinfer#init() abort
     endif
 endfunction
 
-lua require('parinfer.setup')
+lua require('parinfer.init')
